@@ -4,13 +4,9 @@ from numpy array
 
 """
 import numpy as np
-import cupy as cp
 
 
 class KNN:
-    """ TODO: some more extensive testing required, somehow some datas are accurate while some other is not,
-        One idea is to add 1 to all rating data so there is a distinction between dislike and no vote"""
-    _MAX_WORKER = 4
 
     def __init__(self):
         self.K = 1
@@ -24,10 +20,11 @@ class KNN:
         indices = arr.nonzero()
         for i in indices[0]:
             sum_score += abs(float(arr[i] - pred[i]))
+            # print("arri: ", arr[i], ", predi: ", pred[i], ", calc: ", abs(float(arr[i] - pred[i])))
         return sum_score / len(indices[0]) if len(indices[0]) != 0 else 0.0
 
     @staticmethod
-    def calc_prediction(arr, data, distances, nonzero=True):
+    def calc_prediction(arr, data, distances):
         indices = arr.nonzero()
         simsum = sum(i for _, i in distances)
         base = (sum([arr + (data[i[0]] * i[1]) for i in distances]) / simsum if simsum != 0 else arr)
@@ -42,26 +39,17 @@ class KNN:
             base[i] = base[i] / counter if counter != 0 else base[i]
         return base
 
-    def sparse_inner(self, arr1, arr2):
-        indices = set(arr1.nonzero()[0])
-        indices.update(arr2.nonzero()[0])
-        sum = 0
-        for i in indices:
-            sum += (arr1[i] * arr2[i])
-
-        return sum
-
     # TODO: add other similarity functions too
-    def sim(self, arr1, arr2):
-        # dp = np.dot(arr1, arr2)
-        dp = self.sparse_inner(arr1, arr2)
+    @staticmethod
+    def sim(arr1, arr2):
+        dp = np.dot(arr1, arr2)
         return dp / (np.linalg.norm(arr1) * np.linalg.norm(arr2)) if dp != 0 else 0.0
 
     def all_similarities(self, data, target):
         out = []
 
         for d in range(data.shape[0]):
-            out.append((d, cp.asnumpy(self.sim(data[d], target))))
+            out.append((d, self.sim(data[d], target)))
 
         y = sorted(out, key=lambda arr: arr[1], reverse=True)
         return y

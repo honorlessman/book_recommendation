@@ -19,7 +19,8 @@ class CSVParser:
         self.__read()
 
     def __read(self):
-        self.DF = pandas.read_csv(self.path, delimiter=';', header=0, encoding="ISO-8859-1", error_bad_lines=False)
+        self.DF = pandas.read_csv(self.path, delimiter=';', header=0, encoding="ISO-8859-1", error_bad_lines=False,
+                                  warn_bad_lines=False)
 
     def merge(self, d2: pandas.DataFrame(), key, jtype="inner"):
         """ Merges DFs by a key """
