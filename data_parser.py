@@ -48,15 +48,17 @@ class CSVParser:
         return self.DF[[column_names]].values
 
     """ Transforms dataframe into zero padded ndarray matrix """
-    def to_matrix(self, columns):
+    def to_matrix(self, columns, book_index):
 
-        book_index = self.indexify('ISBN')
         user_index = self.indexify('User-ID')
 
         n_arr = np.zeros((len(user_index), len(book_index)))
         data = self.get_columns(columns)
 
         for row in data:
+            if row[0] not in book_index.keys():
+                print("passing unmatched book [%s]" % row[0])
+                continue
             n_arr[user_index[row[1]]][book_index[row[0]]] = float(row[2] + 1)
 
         return n_arr

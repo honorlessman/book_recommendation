@@ -2,7 +2,10 @@ from knn_model import KNN
 from data_parser import CSVParser
 from user_knn import UKNN
 
-# matrix one is bugged so do not switch this off
+# matrix one is not very accurate since it uses cosine similarity also not very optimized so do not use if you can
+# switches between matrix mode and dictionary mode depending
+# FALSE =   Matrix      (faster on dense data(even then immensely slow) but less accurate)
+# TRUE  =   Dictionary  (faster on sparse data, more accurate)
 SPARSE = False
 
 if __name__ == "__main__":
@@ -38,9 +41,12 @@ if __name__ == "__main__":
     else:
         """ data is dense so using matrix will speed this up """
 
+        # since data might have different books we eliminate that chance by using common index
+        book_index = merged.indexify('ISBN')
+
         # fill a zero filled matrix with data
-        test_arr = test_in.to_matrix(['ISBN', 'User-ID', 'Book-Rating'])
-        data_arr = merged.to_matrix(['ISBN', 'User-ID', 'Book-Rating'])
+        test_arr = test_in.to_matrix(['ISBN', 'User-ID', 'Book-Rating'], book_index)
+        data_arr = merged.to_matrix(['ISBN', 'User-ID', 'Book-Rating'], book_index)
         print("data parsed")
 
         # fit data to model and make a prediction
