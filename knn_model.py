@@ -39,7 +39,6 @@ class KNN:
             base[i] = base[i] / counter if counter != 0 else base[i]
         return base
 
-    # TODO: add other similarity functions too
     @staticmethod
     def sim(arr1, arr2):
         dp = np.dot(arr1, arr2)
@@ -55,7 +54,7 @@ class KNN:
         return y
 
     """ 
-    Weighted neares n calculator, weights are not distance based but similarity based
+    Weighted nearest n calculator, weights are not distance based but similarity based
     Also calculates score based on predicted values
         
     """
