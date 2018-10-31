@@ -61,7 +61,6 @@ class CSVParser:
 
         return n_arr
 
-
     """ Transforms the dataframe into user and book object dictionary """
     def to_dict(self, columns):
 
