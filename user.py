@@ -8,9 +8,9 @@ class User:
         self.uid = user_id
         self.avg = 0
 
-        self.norm = 0.000000001
-        self.adj_norm = 0.000000001
-        self.corr_norm = 0.000000001
+        self.norm = 1.0
+        self.adj_norm = 1.0
+        self.corr_norm = 1.0
 
         self.products = {}
 
@@ -33,7 +33,6 @@ class User:
         self.norm = sqrt(self.norm)
         self.adj_norm = sqrt(self.adj_norm)
         self.corr_norm = sqrt(self.corr_norm)
-
 
     def update(self):
         self.calc_avg()

@@ -3,7 +3,6 @@ KNN calculation with dictionary based approach with 3 different similarity algor
 
 """
 
-from math import sqrt
 from user import User
 
 
@@ -73,12 +72,17 @@ class UKNN:
             total += ((d1.books[ind] - self.u_book_list[ind].avg) * (d2.books[ind] - self.u_book_list[ind].avg))
         return total
 
-    def adj_cos_sim(self, darr, test):
-        return self.adj_cos_dot(darr, test) / (darr.adj_norm * test.adj_norm)
+    def adj_cos_sim(self, s_user, test):
+        return self.adj_cos_dot(self.u_user_list[s_user], test) / (self.u_user_list[s_user].adj_norm * test.adj_norm)
     """ ------------------------- END ------------------------- """
 
-    def calc_similarities(self, data, test):
-        out = [(user, self.similarity_function(user, test)) for user in data.values()]
+    def calc_similarities(self, test):
+        similar_users = []
+        for book in test.books:
+            similar_users.extend(self.u_book_list[book].users.keys())
+
+        out = [(self.u_user_list[user], self.similarity_function(user, test)) for user in similar_users]
+
         return sorted(out, key=lambda arr: arr[1], reverse=True)[:self.K]
 
     def calc_rating(self, sims):
@@ -113,8 +117,8 @@ class UKNN:
 
         return pred, pred_nw
 
-    def calc_nearest_n(self, data, test):
-        sims = self.calc_similarities(data, test)
+    def calc_nearest_n(self, test):
+        sims = self.calc_similarities(test)
         pred, pred_nw = self.calc_rating(sims)
         self.calculate_score(test, pred, pred_nw)
 
@@ -128,8 +132,8 @@ class UKNN:
         self.u_book_list = data[1]
         self.t_book_list = test[1]
 
-        for t in test[0].values():
-            self.calc_nearest_n(data[0], t)
+        for test_user in test[0].values():
+            self.calc_nearest_n(test_user)
 
         self.score /= len(test[0])
         self.score_nw /= len(test[0])
