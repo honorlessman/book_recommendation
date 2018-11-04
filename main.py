@@ -6,24 +6,33 @@ from user_knn import UKNN
 # switches between matrix mode and dictionary mode depending
 # FALSE =   Matrix      (faster on dense data(even then immensely slow) but less accurate)
 # TRUE  =   Dictionary  (faster on sparse data, more accurate)
-SPARSE = False
+SPARSE = True
+
+# Test file path
+# TEST_FILE = "data/BXBookRatingsTest.csv"
+TEST_FILE = "data/Test/Test-User_Rating300.csv"
+
+# Fix column names if they are not similar to data
+FIX_COLUMN_NAMES = True
 
 if __name__ == "__main__":
-    file_arr = ["data/BX-Users.csv", "data/BX-Book-Ratings-Train.csv", "data/BX-Books.csv",
-                "data/Test/Test-User_Rating300.csv"]
+    file_arr = ["data/BX-Users.csv", "data/BX-Book-Ratings-Train.csv", "data/BX-Books.csv"]
     data_arr = [CSVParser(f) for f in file_arr]
 
     # filter out usa and canada
     data_arr[0].filter('Location', ", usa|, canada")
 
-    # merge test file with book file to equalize book count
-    test_in = CSVParser(file_arr[3])
-    test_in.merge(data_arr[2], "ISBN")
-
     # merge all training files
     merged = data_arr[1]
     merged.merge(data_arr[0], "User-ID")
     merged.merge(data_arr[2], "ISBN")
+
+    # merge test file with book file to equalize book count
+    test_in = CSVParser(TEST_FILE)
+    if FIX_COLUMN_NAMES:
+        test_in.DF.columns = ["User-ID", "ISBN", "Book-Rating"]
+
+    test_in.filter_by_series(merged.DF['ISBN'], 'ISBN')
 
     if SPARSE:
         """ data is sparse so using dictionary will speed this up """
@@ -31,15 +40,20 @@ if __name__ == "__main__":
         # parse data to dicts
         users, u_books = merged.to_dict(['ISBN', 'User-ID', 'Book-Rating'])
         test, t_books = test_in.to_dict(['ISBN', 'User-ID', 'Book-Rating'])
+
+        CSVParser.normals(users, u_books)
+        CSVParser.normals(test, t_books)
+
         print("data parsed")
 
         # train model and predict
         model = UKNN()
-        model.fit(3, [users, u_books], [test, t_books])
+        model.fit([users, u_books], [test, t_books], k=3, threshold=0)
         print("Weighted score: ", model.score)
+        print("Non-Weighted score: ", model.score_nw)
 
     else:
-        """ data is dense so using matrix will speed this up """
+        """ data is dense so using matrix will give us a constant runtime compared to dictionary """
 
         # since data might have different books we eliminate that chance by using common index
         book_index = merged.indexify('ISBN')
@@ -50,8 +64,9 @@ if __name__ == "__main__":
         print("data parsed")
 
         # fit data to model and make a prediction
+        # since matrix method is extremely slow test count is limited
         model = KNN()
-        model.fit(3, data_arr, test_arr)
+        model.fit(3, data_arr, test_arr[:200])
         predict = model.predict
         print("Weighted score: ", model.score)
 

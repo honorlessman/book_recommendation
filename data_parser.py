@@ -34,22 +34,27 @@ class CSVParser:
         """ Filters out a Dataframe by given key/value pairs """
         self.DF = self.DF.loc[self.DF[key].str.contains(value)]
 
+    def filter_by_series(self, column, key, jtype='inner'):
+        """ Filters data by series """
+        self.DF = self.DF.merge(column.drop_duplicates().to_frame(), on=key, how=jtype)
+
     def indexify(self, key):
         """ Enumerates given key to a an index starting from 0 """
         arr = self.DF[key].drop_duplicates().real
         return {arr[data]: data for data in range(len(arr))}
 
     def distinct(self, key):
+        """ get distinct data from a column """
         return self.DF[key].drop_duplicates()
 
     def get_columns(self, column_names):
+        """ get a column """
         if type(column_names) == list:
             return self.DF[column_names].values
         return self.DF[[column_names]].values
 
-    """ Transforms dataframe into zero padded ndarray matrix """
     def to_matrix(self, columns, book_index):
-
+        """ Transforms dataframe into zero padded ndarray matrix """
         user_index = self.indexify('User-ID')
 
         n_arr = np.zeros((len(user_index), len(book_index)))
@@ -63,9 +68,8 @@ class CSVParser:
 
         return n_arr
 
-    """ Transforms the dataframe into user and book object dictionary """
     def to_dict(self, columns):
-
+        """ Transforms the dataframe into user and book object dictionary """
         # get distinct keys
         book_index = self.indexify('ISBN')
         user_index = self.indexify('User-ID')
@@ -86,3 +90,9 @@ class CSVParser:
             books[user[0]].update()
 
         return users, books
+
+    @staticmethod
+    # TODO: refactor to "Calculations"
+    def normals(users, books):
+        for user in users.values():
+            user.calc_norm(books)
