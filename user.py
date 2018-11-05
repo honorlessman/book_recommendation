@@ -8,9 +8,9 @@ class User:
         self.uid = user_id
         self.avg = 0
 
-        self.norm = 1.0
-        self.adj_norm = 1.0
-        self.corr_norm = 1.0
+        self.norm = 0.0
+        self.adj_norm = 0.0
+        self.corr_norm = 0.0
 
         self.products = {}
 

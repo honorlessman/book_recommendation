@@ -50,8 +50,9 @@ class UKNN:
             total += ((d1.books[ind] - avg_d1) * (d2.books[ind] - avg_d2))
         return total
 
-    def cor_sim(self, darr, test):
-        return self.cor_dot(darr, test) / (darr.corr_norm * test.corr_norm)
+    def cor_sim(self, s_user, test):
+        norm = s_user.corr_norm * test.corr_norm
+        return self.cor_dot(s_user, test) / norm if norm != 0 else 0.0
     """ ------------------------- CORRELATION END ------------------------- """
 
     """ --------- COSINE SIMILARITY FUNCTION --------- """
@@ -61,8 +62,8 @@ class UKNN:
             total += (d1.books[ind] * d2.books[ind])
         return total
 
-    def cos_sim(self, darr, test):
-        return self.cos_dot(darr, test) / (darr.norm * test.norm)
+    def cos_sim(self, s_user, test):
+        return self.cos_dot(s_user, test) / (s_user.norm * test.norm)
     """ ------------------------- COSINE END ------------------------- """
 
     """ --------- ADJUSTED COSINE SIMILARITY FUNCTION --------- """
@@ -73,7 +74,8 @@ class UKNN:
         return total
 
     def adj_cos_sim(self, s_user, test):
-        return self.adj_cos_dot(self.u_user_list[s_user], test) / (self.u_user_list[s_user].adj_norm * test.adj_norm)
+        norm = s_user.adj_norm * test.adj_norm
+        return self.adj_cos_dot(s_user, test) / norm if norm != 0 else 0.0
     """ ------------------------- END ------------------------- """
 
     def calc_similarities(self, test):
@@ -81,17 +83,18 @@ class UKNN:
         for book in test.books:
             similar_users.extend(self.u_book_list[book].users.keys())
 
-        out = [(self.u_user_list[user], self.similarity_function(user, test)) for user in similar_users]
-
+        out = [(self.u_user_list.get(user), self.similarity_function(self.u_user_list.get(user), test)) for user in similar_users
+               if self.u_user_list.get(user) is not None]
         return sorted(out, key=lambda arr: arr[1], reverse=True)[:self.K]
 
     def calc_rating(self, sims):
+        # TODO: fix the similarity
         pred = User("prediction")
         pred_nw = User('non weight prediction')
         sim_sum = 0
 
         for user, sim in sims:
-            sim_sum += sim
+            sim_sum += abs(sim)
 
             for book, rating in user.books.items():
 
@@ -102,18 +105,15 @@ class UKNN:
                 # sum ratings
                 if book not in pred.books.keys():
                     pred_nw.append_book(book, rating)
-                    pred.append_book(book, (rating * sim))
+                    pred.append_book(book, (rating * abs(sim)))
                 else:
                     pred_nw.books[book] += rating
-                    pred.books[book] += (rating * sim)
+                    pred.books[book] += (rating * abs(sim))
 
         # mean
         for book in pred.books.keys():
             pred_nw.books[book] /= self.K
-            pred.books[book] /= (sim_sum if sim_sum != 0 else 1)
-
-        pred.update()
-        pred_nw.update()
+            pred.books[book] /= (sim_sum if sim_sum != 0 else self.K)
 
         return pred, pred_nw
 
@@ -123,6 +123,10 @@ class UKNN:
         self.calculate_score(test, pred, pred_nw)
 
     def fit(self, data, test, threshold=0, k=3):
+        self.K = 0
+        self.score = 0.0
+        self.score_nw = 0.0
+
         self.K = k
         self.threshold = threshold
 
