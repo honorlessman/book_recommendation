@@ -10,7 +10,6 @@ SPARSE = True
 
 # Test file path
 TEST_FILE = "code/data/BXBookRatingsTest.csv"
-# TEST_FILE = "code/data/Test/Test-User_Rating300.csv"
 
 # Fix column names if they are not similar to data
 FIX_COLUMN_NAMES = True
