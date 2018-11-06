@@ -92,7 +92,6 @@ class CSVParser:
         return users, books
 
     @staticmethod
-    # TODO: refactor to "Calculations"
     def normals(users, books):
         for user in users.values():
             user.calc_norm(books)

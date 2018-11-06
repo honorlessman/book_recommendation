@@ -89,7 +89,6 @@ class UKNN:
         return sorted(out, key=lambda arr: arr[1], reverse=True)[:self.K]
 
     def calc_rating(self, sims, test):
-        # TODO: fix the similarity
         pred = User("prediction")
         pred_nw = User('non weight prediction')
         sim_sum = 0

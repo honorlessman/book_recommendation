@@ -9,14 +9,14 @@ from code.user_knn import UKNN
 SPARSE = True
 
 # Test file path
-TEST_FILE = "data/BXBookRatingsTest.csv"
-# TEST_FILE = "data/Test/Test-User_Rating300.csv"
+TEST_FILE = "code/data/BXBookRatingsTest.csv"
+# TEST_FILE = "code/data/Test/Test-User_Rating300.csv"
 
 # Fix column names if they are not similar to data
 FIX_COLUMN_NAMES = True
 
 if __name__ == "__main__":
-    file_arr = ["data/BX-Users.csv", "data/BX-Book-Ratings-Train.csv", "data/BX-Books.csv"]
+    file_arr = ["code/data/BX-Users.csv", "code/data/BX-Book-Ratings-Train.csv", "code/data/BX-Books.csv"]
     data_arr = [CSVParser(f) for f in file_arr]
 
     # filter out usa and canada
@@ -49,13 +49,11 @@ if __name__ == "__main__":
         # train model and predict
         model = UKNN()
 
-        # Cross Validation for model
+        # Cross Validation for model, pretty slow depending on k values(up to 500seconds) so think carefully
         # cross_val = CrossValidation(1, 20, [users, u_books], UKNN())
         # cross_val.validate(10)
 
-        for i in range(0, 50):
-            model.fit([users, u_books], [test, t_books], k=2, threshold=i)
-            print("{},{},{}".format(i, model.score, model.score_nw))
+        model.fit([users, u_books], [test, t_books], k=2, threshold=20)
         print("Weighted test score: ", model.score)
         print("Non-Weighted test score: ", model.score_nw)
 
@@ -76,7 +74,5 @@ if __name__ == "__main__":
         model.fit(3, data_arr, test_arr[:200])
         predict = model.predict
         print("Weighted score: ", model.score)
-
-    # TODO: add cross validation
 
     print("end")
