@@ -1,6 +1,7 @@
 from code.knn_model import KNN
 from code.data_parser import CSVParser
 from code.user_knn import UKNN
+from code.validation import CrossValidation
 
 # matrix one is not very accurate since it uses cosine similarity also not very optimized so do not use if you can
 # switches between matrix mode and dictionary mode depending
@@ -13,6 +14,10 @@ TEST_FILE = "code/data/BXBookRatingsTest.csv"
 
 # Fix column names if they are not similar to data
 FIX_COLUMN_NAMES = True
+
+# Enable cross validation (warning, super long even if program is really fast)
+ENABLE_CROSS_VALIDATION = False
+OUTPUT_THE_VALIDATION_STEPS = False
 
 if __name__ == "__main__":
     file_arr = ["code/data/BX-Users.csv", "code/data/BX-Book-Ratings-Train.csv", "code/data/BX-Books.csv"]
@@ -49,8 +54,9 @@ if __name__ == "__main__":
         model = UKNN()
 
         # Cross Validation for model, pretty slow depending on k values(up to 500seconds) so think carefully
-        # cross_val = CrossValidation(1, 20, [users, u_books], UKNN())
-        # cross_val.validate(10)
+        if ENABLE_CROSS_VALIDATION:
+            cross_val = CrossValidation(1, 20, [users, u_books], UKNN())
+            cross_val.validate(10, log_score=OUTPUT_THE_VALIDATION_STEPS)
 
         model.fit([users, u_books], [test, t_books], k=2, threshold=20)
         print("Weighted test score: ", model.score)

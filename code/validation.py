@@ -45,10 +45,10 @@ class CrossValidation:
         if log_score:
             file.write("{},{},{}".format(k, self.kfold_score, self.kfold_nw_score))
             file.write("\n")
-        # print("K-fold weighted validation score for fold count", fold, "and k =", k, ": ", self.kfold_score)
-        # print("K-fold non-weighted validation score for fold count", fold, "and k =", k, ": ", self.kfold_nw_score)
+        print("K-fold weighted validation score for fold count", fold, "and k =", k, ": ", self.kfold_score)
+        print("K-fold non-weighted validation score for fold count", fold, "and k =", k, ": ", self.kfold_nw_score)
 
-    def validate(self, fold, log_score=True):
+    def validate(self, fold, log_score=False):
         f = None
 
         if log_score:
