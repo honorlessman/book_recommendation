@@ -1,5 +1,6 @@
 from math import ceil
 
+
 class CrossValidation:
     def __init__(self, min_k, max_k, data, knn):
         self.min_k = min_k
@@ -22,7 +23,7 @@ class CrossValidation:
         """ split a dictionary into n clusters """
         return [{user: dic[user] for user in cluster} for cluster in self.array_split(list(dic.keys()), n)]
 
-    def k_fold(self, fold, k):
+    def k_fold(self, fold, k, log_score=True, file=None):
         """ K-fold cross validation """
         clusters = self.dictionary_split(self.u_data, fold)
 
@@ -41,9 +42,24 @@ class CrossValidation:
 
         self.kfold_score /= fold
         self.kfold_nw_score /= fold
-        print("K-fold weighted validation score for fold count", fold, "and k =", k, ": ", self.kfold_score)
-        print("K-fold non-weighted validation score for fold count", fold, "and k =", k, ": ", self.kfold_nw_score)
+        if log_score:
+            file.write("{},{},{}".format(k, self.kfold_score, self.kfold_nw_score))
+            file.write("\n")
+        # print("K-fold weighted validation score for fold count", fold, "and k =", k, ": ", self.kfold_score)
+        # print("K-fold non-weighted validation score for fold count", fold, "and k =", k, ": ", self.kfold_nw_score)
 
-    def validate(self, fold):
+    def validate(self, fold, log_score=True):
+        f = None
+
+        if log_score:
+            f = open("validation_results.csv", "w+")
+            f.write("k,score,score_nw")
+            f.write("\n")
+
+        print("Validating...")
         for k_value in range(self.min_k, self.max_k):
-            self.k_fold(fold, k_value)
+            self.k_fold(fold, k_value, log_score=log_score, file=f)
+            print("{}/{}".format(k_value, (self.max_k - self.min_k)))
+
+        if f is not None:
+            f.close()

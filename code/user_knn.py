@@ -3,7 +3,7 @@ KNN calculation with dictionary based approach with 3 different similarity algor
 
 """
 
-from user import User
+from code.user import User
 
 
 class UKNN:
@@ -11,7 +11,7 @@ class UKNN:
         self.K = 0
         self.score = 0.0
         self.score_nw = 0.0
-        self.similarity_function = self.adj_cos_sim
+        self.similarity_function = self.cos_sim
         self.threshold = 0
 
         """ 
@@ -63,7 +63,8 @@ class UKNN:
         return total
 
     def cos_sim(self, s_user, test):
-        return self.cos_dot(s_user, test) / (s_user.norm * test.norm)
+        norm = s_user.norm * test.norm
+        return self.cos_dot(s_user, test) / norm if norm != 0 else 0.0
     """ ------------------------- COSINE END ------------------------- """
 
     """ --------- ADJUSTED COSINE SIMILARITY FUNCTION --------- """
@@ -87,7 +88,7 @@ class UKNN:
                if self.u_user_list.get(user) is not None]
         return sorted(out, key=lambda arr: arr[1], reverse=True)[:self.K]
 
-    def calc_rating(self, sims):
+    def calc_rating(self, sims, test):
         # TODO: fix the similarity
         pred = User("prediction")
         pred_nw = User('non weight prediction')
@@ -100,7 +101,7 @@ class UKNN:
 
                 # filter out books rated by user count less than threshold
                 if self.u_book_list[book].user_count < self.threshold:
-                    continue
+                    rating = test.avg
 
                 # sum ratings
                 if book not in pred.books.keys():
@@ -119,7 +120,7 @@ class UKNN:
 
     def calc_nearest_n(self, test):
         sims = self.calc_similarities(test)
-        pred, pred_nw = self.calc_rating(sims)
+        pred, pred_nw = self.calc_rating(sims, test)
         self.calculate_score(test, pred, pred_nw)
 
     def fit(self, data, test, threshold=0, k=3):

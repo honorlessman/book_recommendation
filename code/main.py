@@ -1,7 +1,6 @@
-from knn_model import KNN
-from data_parser import CSVParser
-from user_knn import UKNN
-from validation import CrossValidation
+from code.knn_model import KNN
+from code.data_parser import CSVParser
+from code.user_knn import UKNN
 
 # matrix one is not very accurate since it uses cosine similarity also not very optimized so do not use if you can
 # switches between matrix mode and dictionary mode depending
@@ -50,11 +49,13 @@ if __name__ == "__main__":
         # train model and predict
         model = UKNN()
 
-        # cross validation for model
-        cross_val = CrossValidation(1, 10, [users, u_books], UKNN())
-        cross_val.validate(10)
+        # Cross Validation for model
+        # cross_val = CrossValidation(1, 20, [users, u_books], UKNN())
+        # cross_val.validate(10)
 
-        model.fit([users, u_books], [test, t_books], k=3)
+        for i in range(0, 50):
+            model.fit([users, u_books], [test, t_books], k=2, threshold=i)
+            print("{},{},{}".format(i, model.score, model.score_nw))
         print("Weighted test score: ", model.score)
         print("Non-Weighted test score: ", model.score_nw)
 

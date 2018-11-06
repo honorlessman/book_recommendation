@@ -5,8 +5,8 @@ Parser and toolkit for CSV data
 
 import pandas
 import numpy as np
-from user import User
-from book import Book
+from code.user import User
+from code.book import Book
 
 
 class CSVParser:
